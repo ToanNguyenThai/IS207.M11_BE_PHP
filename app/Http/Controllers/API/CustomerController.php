@@ -9,14 +9,14 @@ use Illuminate\Http\Request;
 class CustomerController extends Controller
 {
     public function getAll(){
-        $customer = Customer::select('id','name','phone as phoneNumber','email','address','password')->get();
+        $customer = Customer::select('id','name as customer_name','phone as customer_phoneNumber','email as customer_email','address as customer_address','password as customer_password')->get();
         if (count($customer)==0){
             return response("không tồn tại khách hàng",404);
         }
         return response(['clients'=>$customer],200);
     }
     public function detail(Request $request){
-        $customer = Customer::select('id','name','phone as phoneNumber','email','address','password')->where('id',$request->id)->first();
+        $customer = Customer::select('id','name as customer_name','phone as customer_phoneNumber','email as customer_email','address as customer_address','password as customer_password')->where('id',$request->id)->first();
         if ($customer == null){
             return response("không tồn tại khách hàng",404);
         }

@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class EmployeeController extends Controller
 {
     public function getAll(){
-        $employee = Employee::select('id','name as employee_name','gender as employee_gender','phone as employee_phone','user_name as employee_username','address as employee_address','password as employee_password')->get();
+        $employee = Employee::select('id','name as employee_name','gender as employee_sex','phone as employee_phone','user_name as employee_username','address as employee_address','password as employee_password','role as Role')->get();
         return response(['employee'=>$employee],200);
     }
     public function insert(Request $request){
@@ -20,7 +20,7 @@ class EmployeeController extends Controller
         $employee->address = $request->employee_address;
         $employee->user_name = $request->employee_username;
         $employee->password = $request->employee_password;
-        $employee->save(); // lưu 
+        $employee->save(); // lưu
         return response('them thanh cong',200);
     }
     public function update(Request $request){
@@ -34,11 +34,11 @@ class EmployeeController extends Controller
         $employee->address = $request->employee_address;
         $employee->user_name = $request->employee_username;
         $employee->password = $request->employee_password;
-        $employee->save(); //lưu 
+        $employee->save(); //lưu
         return response('cap nhat thanh cong',200);
     }
     public function delete(Request $request){
-        $employee = Employee::where('id',$request->id)->select('id','name as employee_name','gender as employee_gender','phone as employee_phone','user_name as employee_username','address as employee_address','password as employee_password')->first(); // lấy 1 
+        $employee = Employee::where('id',$request->id)->select('id','name as employee_name','gender as employee_gender','phone as employee_phone','user_name as employee_username','address as employee_address','password as employee_password')->first(); // lấy 1
         if($employee==null){
             return response("khong tim thay",404);
         }

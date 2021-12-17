@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
             'quantity'=>20,
             'size'=>'40',
         ]);
-       
+
         // db seed image img
         DB::table('images')->insert([
             'product_id'=>1,
@@ -84,6 +84,7 @@ class DatabaseSeeder extends Seeder
             'user_name'=>'admin_hang',
             'address'=>'Việt Nam',
             'password'=>'admin',
+            'role'=>'admin',
         ]);
         DB::table('employees')->insert([
             'name'=>'users',
@@ -94,6 +95,7 @@ class DatabaseSeeder extends Seeder
             'user_name'=>'user_nhanvien',
             'address'=>'Việt Nam',
             'password'=>'user',
+            'role'=>'user',
         ]);
         //db seed customer
         DB::table('customers')->insert([

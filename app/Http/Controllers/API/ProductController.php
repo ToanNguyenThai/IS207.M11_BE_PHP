@@ -13,10 +13,9 @@ class ProductController extends Controller
     // function lấy về tất cả sản phẩm
     public function getAll(){
         // $product = Product::join('product_details','products.id','product_details.product_id')
-        $product = Product::select('id','name','price','imgURL as imgSrc','type as purpose','total_product as number')
+        $product = Product::select('id','name as product_name','price as product_price','imgURL','type as product_type','total_product as totalProducts')
         ->get(); // lấy theo mảng
         foreach($product as $item){
-
             $product_detail = ProductDetail::where('product_id',$item->id)->get();
             $size = array(); // mảng trống
             $color = array();// mảng trống
@@ -29,8 +28,8 @@ class ProductController extends Controller
                     array_push($color,$detail->color);
                 }
             }
-            $item->color = $color;
-            $item->size = $size;
+            $item->product_colors = $color;
+            $item->product_sizes = $size;
 
             $image = Image::where('product_id',$item->id)->get();
             if($image->count()>=1){
@@ -38,25 +37,25 @@ class ProductController extends Controller
                 foreach($image as $item2){
                     array_push($img,$item2->image);
                 }
-                $item->details_sideImg = $img;
+                $item->product_images = $img;
             }
         }
-       
-        return response(["products"=>$product],200); 
-        // 200 thành công 
-        // 404 không tồn tại 
+
+        return response(["products"=>$product],200);
+        // 200 thành công
+        // 404 không tồn tại
         // 403 không đủ quyền
     }
-    //function get về chi tiết sản phẩm 
+    //function get về chi tiết sản phẩm
     public function getdetail($id){
         // select id , name,... from products where id = $id
-        $product= Product::select('id','name','price','type as purpose','imgURL as imgSrc','total_product as number')
+        $product= Product::select('id','name as product_name','price as product_price','imgURL','type as product_type','total_product as totalProducts')
         ->where('id',$id)
         ->first();
         if($product == null){
             return response('sản phẩm không tồn tại',404);
         }
-        // đã tìm ra sản phẩm 
+        // đã tìm ra sản phẩm
 
         $image = Image::where('product_id',$product->id)->get(); // select * from images where ......
         if($image->count()>=1){
@@ -64,7 +63,7 @@ class ProductController extends Controller
             foreach($image as $item2){
                 array_push($img,$item2->image);
             }
-            $product->details_sideImg = $img;
+            $product->product_images = $img;
         }
 
          $product_detail = ProductDetail::where('product_id',$id)->get();
@@ -79,40 +78,101 @@ class ProductController extends Controller
                     array_push($color,$detail->color);
                 }
             }
-        $product->size = $size;
-        $product->color = $color;
+        $product->product_sizes = $size;
+        $product->product_colors = $color;
         // $product->size = $detail->size;
         return response($product,200);
     }
-    //function thêm sản phẩm 
     public function insert(Request $request){
-        //khởi tạo sản phẩm 
+        //khởi tạo sản phẩm
         $product = new Product();
         $product->name= $request->name; //tên sản phẩm
         $product->price = $request->price; //giá sản phẩm
-        $product->type = $request->purpose; //kiểu sản phẩm 
-        $product->total_product = 0; // số lượng mặc định 
-        //xử lí ảnh chính 
-        if($request->hasFile('imgSrc')){
-            $imageURL =time().'.'.$request->imgSrc->getClientOriginalExtension();
-            $request->imgSrc->move(public_path('/upload/product'),$imageURL); // lưu ảnh
-            $product->imgURL = $imageURL;
-        }
-        $product->save(); //lưu sản phẩm 
+        $product->type = $request->purpose; //kiểu sản phẩm
+        $product->total_product = 0; // số lượng mặc định
+        $product->imgURL = $request->imgSrc;
+        //xử lí ảnh chính
+        $product->save(); //lưu sản phẩm
         //Xử lí ảnh chi tiết
-        if($request->hasFile('details_sideImg')){
-            // $test= array();
-            foreach($request->details_sideImg as $key=>$img){
+        $image =json_decode($request->details_sideImg) ;
+//        return response(["thêm thành công"=>$image],200); // nếu thành công sẽ trả về status code 200
+
+        foreach($image as $key=>$img){
                 $imgdetail = new Image();
                 $imgdetail->product_id = $product->id;
-                $image1 =time().$key.'.'.$img->getClientOriginalExtension();
-                $img->move(public_path('upload/product_detail'),$image1);
-                $imgdetail->image = $image1;
-                $imgdetail->save(); // lưu ảnh 
+                $imgdetail->image = $img;
+                $imgdetail->save(); // lưu ảnh
             }
-        }
-         return response("thêm thành công",200); // nếu thành công sẽ trả về status code 200 
+        return response("thêm thành công",200); // nếu thành công sẽ trả về status code 200
     }
+    //function thêm sản phẩm
+//    public function insert(Request $request){
+//        //khởi tạo sản phẩm
+//        $product = new Product();
+//        $product->name= $request->name; //tên sản phẩm
+//        $product->price = $request->price; //giá sản phẩm
+//        $product->type = $request->purpose; //kiểu sản phẩm
+//        $product->total_product = 0; // số lượng mặc định
+//        //xử lí ảnh chính
+//        if($request->hasFile('imgSrc')){
+//            $imageURL =time().'.'.$request->imgSrc->getClientOriginalExtension();
+//            $request->imgSrc->move(public_path('/upload/product'),$imageURL); // lưu ảnh
+//            $product->imgURL = $imageURL;
+//        }
+//        $product->save(); //lưu sản phẩm
+//        //Xử lí ảnh chi tiết
+//        if($request->hasFile('details_sideImg')){
+//            // $test= array();
+//            foreach($request->details_sideImg as $key=>$img){
+//                $imgdetail = new Image();
+//                $imgdetail->product_id = $product->id;
+//                $image1 =time().$key.'.'.$img->getClientOriginalExtension();
+//                $img->move(public_path('upload/product_detail'),$image1);
+//                $imgdetail->image = $image1;
+//                $imgdetail->save(); // lưu ảnh
+//            }
+//        }
+//         return response("thêm thành công",200); // nếu thành công sẽ trả về status code 200
+//    }
+
+//    public function update(Request $request){
+//        $product = Product::find($request->id);
+//        if ($product == null){
+//            return response("Sản phẩm không tồn tại",404);
+//        }
+//        else {
+//            $product->name= $request->name; //tên sản phẩm
+//            $product->price = $request->price; //giá sản phẩm
+//            $product->type = $request->purpose; //kiểu sản phẩm
+//            if($request->hasFile('imgSrc')){
+//                $imageURL =time().'.'.$request->imgSrc->getClientOriginalExtension();
+//                $request->imgSrc->move(public_path('/upload/product'),$imageURL);
+//                unlink(public_path('/upload/product/').$product->imgURL); // xóa ảnh cũ
+//                $product->imgURL = $imageURL;
+//            }
+//            if($request->hasFile('details_sideImg')){
+//                $imageDetail = Image::where('product_id',$request->id)->get(); //tìm mảng ảnh cũ
+//                $imageDetail;
+//                if(count($imageDetail) >= 1 )
+//                {
+//                    foreach($imageDetail as $imgremove){
+//                        unlink(public_path('/upload/product_detail/').$imgremove->image);
+//                        $imgremove->delete();
+//                    }
+//                }
+//                foreach($request->details_sideImg as $key=>$img){
+//                    $imgdetail = new Image();
+//                    $imgdetail->product_id = $product->id;
+//                    $image1 =time().$key.'.'.$img->getClientOriginalExtension();
+//                    $img->move(public_path('upload/product_detail'),$image1);
+//                    $imgdetail->image = $image1;
+//                    $imgdetail->save(); // lưu ảnh
+//                }
+//            }
+//            $product->save();
+//            return response("OK",200);
+//        }
+//    }
     public function update(Request $request){
         $product = Product::find($request->id);
         if ($product == null){
@@ -121,32 +181,23 @@ class ProductController extends Controller
         else {
             $product->name= $request->name; //tên sản phẩm
             $product->price = $request->price; //giá sản phẩm
-            $product->type = $request->purpose; //kiểu sản phẩm 
-            if($request->hasFile('imgSrc')){
-                $imageURL =time().'.'.$request->imgSrc->getClientOriginalExtension();
-                $request->imgSrc->move(public_path('/upload/product'),$imageURL);
-                unlink(public_path('/upload/product/').$product->imgURL); // xóa ảnh cũ
-                $product->imgURL = $imageURL;
-            }
-            if($request->hasFile('details_sideImg')){
+            $product->type = $request->purpose; //kiểu sản phẩm
+
                 $imageDetail = Image::where('product_id',$request->id)->get(); //tìm mảng ảnh cũ
                 $imageDetail;
                 if(count($imageDetail) >= 1 )
                 {
                     foreach($imageDetail as $imgremove){
-                        unlink(public_path('/upload/product_detail/').$imgremove->image);
                         $imgremove->delete();
                     }
                 }
-                foreach($request->details_sideImg as $key=>$img){
+            $image =json_decode($request->details_sideImg) ;
+                foreach( $image as $key=>$img){
                     $imgdetail = new Image();
                     $imgdetail->product_id = $product->id;
-                    $image1 =time().$key.'.'.$img->getClientOriginalExtension();
-                    $img->move(public_path('upload/product_detail'),$image1);
-                    $imgdetail->image = $image1;
+                    $imgdetail->image = $img;
                     $imgdetail->save(); // lưu ảnh
                 }
-            }
             $product->save();
             return response("OK",200);
         }
@@ -159,7 +210,7 @@ class ProductController extends Controller
         if($detail1!=null){
             $detail1->quantity+= $request->number;
             $detail1->save();
-            
+
             $product = Product::find($request->product_id);
             $soluong = ProductDetail::where('product_id',$request->product_id)
             ->sum('quantity');
@@ -182,7 +233,7 @@ class ProductController extends Controller
     }
     public function update_detail(Request $request){
         $detail = ProductDetail::find($request->id);
-        
+
         if ($detail==null){
             return response("không tồn tại",404);
         }
@@ -209,17 +260,10 @@ class ProductController extends Controller
         }
         $image = Image::where('product_id',$product->id)->get();
         foreach($image as $item ){
-            if(file_exists(public_path('/upload/product_detail/').$item->image)){
-                unlink(public_path('/upload/product_detail/').$item->image);
-
-            }
-            $item->delete();
-        }
-        if(file_exists(public_path('/upload/product/').$product->imgURL)){
-            unlink(public_path('/upload/product/').$product->imgURL);
+     $item->delete();
         }
         $product->delete();
         return response("xoa ok",200);
     }
-    
+
 }

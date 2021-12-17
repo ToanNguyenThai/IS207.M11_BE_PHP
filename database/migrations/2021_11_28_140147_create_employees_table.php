@@ -17,13 +17,14 @@ class CreateEmployeesTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('gender')->nullable();
-            $table->date('birthday')->nullable();    
+            $table->date('birthday')->nullable();
             $table->string('phone')->unique()->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('user_name')->unique();
             $table->string('address')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->default("user");
             $table->rememberToken();
             $table->timestamps();
         });
