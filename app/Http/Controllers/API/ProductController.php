@@ -12,17 +12,15 @@ class ProductController extends Controller
 {
     // function lấy về tất cả sản phẩm
     public function getAll(){
-        // $product = Product::join('product_details','products.id','product_details.product_id')
         $product = Product::select('id','name as product_name','price as product_price','imgURL','type as product_type','total_product as totalProducts')
-        ->get(); // lấy theo mảng
+        ->get(); 
         foreach($product as $item){
             $product_detail = ProductDetail::where('product_id',$item->id)->get();
-            $size = array(); // mảng trống
-            $color = array();// mảng trống
+            $size = array(); 
+            $color = array();
             if(count($product_detail)>=1){
                 $size = array();
                 $color = array();
-                // $number = array();
                 foreach($product_detail as $detail){
                     array_push($size,$detail->size);
                     array_push($color,$detail->color);
@@ -33,7 +31,7 @@ class ProductController extends Controller
 
             $image = Image::where('product_id',$item->id)->get();
             if($image->count()>=1){
-                $img = array();//mảng
+                $img = array();
                 foreach($image as $item2){
                     array_push($img,$item2->image);
                 }
@@ -42,23 +40,21 @@ class ProductController extends Controller
         }
 
         return response(["products"=>$product],200);
-        // 200 thành công
-        // 404 không tồn tại
-        // 403 không đủ quyền
+        
     }
-    //function get về chi tiết sản phẩm
+    
     public function getdetail($id){
-        // select id , name,... from products where id = $id
         $product= Product::select('id','name as product_name','price as product_price','imgURL','type as product_type','total_product as totalProducts')
         ->where('id',$id)
         ->first();
         if($product == null){
             return response('sản phẩm không tồn tại',404);
         }
-        // đã tìm ra sản phẩm
-
-        $image = Image::where('product_id',$product->id)->get(); // select * from images where ......
+        
+        $image = Image::where('product_id',$product->id)->get(); 
+        
         if($image->count()>=1){
+            
             $img = array();
             foreach($image as $item2){
                 array_push($img,$item2->image);
@@ -81,12 +77,13 @@ class ProductController extends Controller
         $product->product_sizes = $size;
         $product->product_colors = $color;
         // $product->size = $detail->size;
+        //trả về 200
         return response($product,200);
     }
     public function insert(Request $request){
         //khởi tạo sản phẩm
         $product = new Product();
-        $product->name= $request->name; //tên sản phẩm
+        $product->name= $request->name; //gán tên sản phẩm trong db
         $product->price = $request->price; //giá sản phẩm
         $product->type = $request->purpose; //kiểu sản phẩm
         $product->total_product = 0; // số lượng mặc định
@@ -97,11 +94,12 @@ class ProductController extends Controller
         $image =json_decode($request->details_sideImg) ;
 //        return response(["thêm thành công"=>$image],200); // nếu thành công sẽ trả về status code 200
 
+//chạy vòng for
         foreach($image as $key=>$img){
                 $imgdetail = new Image();
                 $imgdetail->product_id = $product->id;
                 $imgdetail->image = $img;
-                $imgdetail->save(); // lưu ảnh
+                $imgdetail->save(); // lưu db
             }
         return response("thêm thành công",200); // nếu thành công sẽ trả về status code 200
     }
@@ -174,6 +172,7 @@ class ProductController extends Controller
 //        }
 //    }
     public function update(Request $request){
+        //tìm ra thằng sản phẩm để mà cập nhật
         $product = Product::find($request->id);
         if ($product == null){
             return response("Sản phẩm không tồn tại",404);
@@ -182,13 +181,13 @@ class ProductController extends Controller
             $product->name= $request->name; //tên sản phẩm
             $product->price = $request->price; //giá sản phẩm
             $product->type = $request->purpose; //kiểu sản phẩm
-
                 $imageDetail = Image::where('product_id',$request->id)->get(); //tìm mảng ảnh cũ
                 $imageDetail;
+                //đếm
                 if(count($imageDetail) >= 1 )
                 {
                     foreach($imageDetail as $imgremove){
-                        $imgremove->delete();
+                        $imgremove->delete();//xóa
                     }
                 }
             $image =json_decode($request->details_sideImg) ;
@@ -198,37 +197,38 @@ class ProductController extends Controller
                     $imgdetail->image = $img;
                     $imgdetail->save(); // lưu ảnh
                 }
-            $product->save();
-            return response("OK",200);
+            $product->save();//lưu sản phẩm
+            return response("OK",200);//trả về OK 200
         }
     }
     public function insert_detail(Request $request){
         $detail1 = ProductDetail::where('product_id',$request->product_id)
+        //có tồn tại màu, size này ko
         ->where('color',$request->color)
         ->where('size',$request->size)->first();
 
         if($detail1!=null){
             $detail1->quantity+= $request->number;
             $detail1->save();
-
             $product = Product::find($request->product_id);
             $soluong = ProductDetail::where('product_id',$request->product_id)
-            ->sum('quantity');
-            $product->total_product = $soluong;
+            ->sum('quantity');//sl
+            $product->total_product = $soluong;//lưu sl lưu lại
             $product->save();
             return  response("thêm số lượng thành công",200);
-        }
+        } 
             $detail = new ProductDetail();
-            $detail->product_id = $request->product_id;
-            $detail->color = $request->color;
+            $detail->product_id = $request->product_id;//thêm product_id
+            $detail->color = $request->color;//thêm color vô color
             $detail->size = $request->size;
             $detail->quantity = $request->number;
-            $detail->save();// lưu chi tiết sản phẩm
+            $detail->save();// lưu chi tiết
+            
             $product = Product::find($request->product_id);
                 $soluong = ProductDetail::where('product_id',$request->product_id)
                 ->sum('quantity');
                 $product->total_product = $soluong;
-                $product->save();
+                $product->save();//lưu product lại
             return response("thêm thành công",200);
     }
     public function update_detail(Request $request){

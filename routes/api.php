@@ -22,41 +22,36 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-//route api get toàn bộ sản phẩm
-Route::get('/getall',[ProductController::class,'getAll']);
-//route api get toàn bộ khách hàng
-
-Route::get('/client',[CustomerController::class,'getAll']);
-
+//EMPLOYEE
 Route::get('/employee',[EmployeeController::class,'getAll']);
 Route::post('/employee/insert',[EmployeeController::class,'insert']);
-Route::post('/employee/update',[EmployeeController::class,'update']);
-Route::post('/employee/delete',[EmployeeController::class,'delete']);
+Route::put('/employee/update',[EmployeeController::class,'update']);
+Route::delete('/employee/delete',[EmployeeController::class,'delete']);
 Route::post('/employee/detail',[EmployeeController::class,'detail']);
 
-//route api đăng kí
+//CUSTOMER
 Route::post('/dangki',[CustomerController::class,'dangki']);
 Route::post('/doimatkhau',[CustomerController::class,'doimatkhau']);
-
+Route::get('/client',[CustomerController::class,'getAll']);
 Route::prefix('customer')->group(function () {
     Route::post('/insert',[CustomerController::class,'dangki']);
-    Route::post('/update',[CustomerController::class,'update']);
-    Route::post('/delete',[CustomerController::class,'delete']);
+    Route::put('/update',[CustomerController::class,'update']);
+    Route::delete('/delete',[CustomerController::class,'delete']);
     Route::post('/detail',[CustomerController::class,'detail']);
 });
 
+//PRODUCT
+Route::get('/getall',[ProductController::class,'getAll']);
 Route::prefix('product')->group(function () {
     Route::get('/{id}',[ProductController::class,'getdetail']);
     Route::post('/insert',[ProductController::class,'insert']);
-    Route::post('/update',[ProductController::class,'update']);
+    Route::put('/update',[ProductController::class,'update']);
     Route::post('/insert_detail',[ProductController::class,'insert_detail']);
-    /// tới đây
-    Route::post('/update_detail',[ProductController::class,'update_detail']);
-
-    Route::post('/delete',[ProductController::class,'delete']);
-
+    Route::put('/update_detail',[ProductController::class,'update_detail']);
+    Route::delete('/delete',[ProductController::class,'delete']);
 });
+
+//ORDER
 Route::post('/order',[OrderController::class,'order']);
 Route::get('/get_order',[OrderController::class,'getAll']);
 Route::post('/getorderbyphone',[OrderController::class,'getorderbysdt']);

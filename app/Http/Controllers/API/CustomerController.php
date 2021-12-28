@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 class CustomerController extends Controller
 {
     public function getAll(){
+        
         $customer = Customer::select('id','name as customer_name','phone as customer_phoneNumber','email as customer_email','address as customer_address','password as customer_password')->get();
         if (count($customer)==0){
             return response("không tồn tại khách hàng",404);
@@ -20,7 +21,6 @@ class CustomerController extends Controller
         if ($customer == null){
             return response("không tồn tại khách hàng",404);
         }
-        // $customer->delete();
         return response($customer,200);
     }
     public function delete(Request $request){

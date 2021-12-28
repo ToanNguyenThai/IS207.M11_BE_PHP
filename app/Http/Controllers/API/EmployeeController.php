@@ -13,7 +13,7 @@ class EmployeeController extends Controller
         return response(['employee'=>$employee],200);
     }
     public function insert(Request $request){
-        $employee = new Employee(); // tạo đối tượng nhân viên
+        $employee = new Employee(); 
         $employee->name = $request->employee_name;
         $employee->gender = $request->employee_gender;
         $employee->phone = $request->employee_phone;
@@ -38,6 +38,7 @@ class EmployeeController extends Controller
         return response('cap nhat thanh cong',200);
     }
     public function delete(Request $request){
+        ////Lấy ra employee đầu tiên là id
         $employee = Employee::where('id',$request->id)->select('id','name as employee_name','gender as employee_gender','phone as employee_phone','user_name as employee_username','address as employee_address','password as employee_password')->first(); // lấy 1
         if($employee==null){
             return response("khong tim thay",404);
